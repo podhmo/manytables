@@ -5,6 +5,7 @@ import typing_extensions as tx
 
 class MetaData(tx.TypedDict):
     url: str
+    resource_type: str  # "spreadsheet" | 
     db: DBMetadata
 
 

@@ -20,6 +20,7 @@ class Database:
     def metadata(self) -> MetaData:
         url = self._url or f"https://docs.google.com/spreadsheets/d/{self.id}/edit"
         metadata = {
+            "resource_type": "spreadsheet",
             "url": url,
             "db": {
                 "id": self.id,

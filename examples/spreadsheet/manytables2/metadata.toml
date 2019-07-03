@@ -1,3 +1,4 @@
+resource_type = 'spreadsheet'
 url = 'https://docs.google.com/spreadsheets/d/1iu2OfoikMER1Ex9Eferu7aPf9n9i8m7ZEmBN9s-PzlQ/edit'
 
 [db]
