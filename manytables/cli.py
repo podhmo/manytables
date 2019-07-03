@@ -78,6 +78,36 @@ def show(*, config_path: str, path: str = None, debug: bool, n: int = 5) -> None
         print("")
 
 
+def push(
+    *,
+    config_path: str,
+    destination_type: str,
+    name: str = None,
+    path: str,
+    url: str = None,
+    with_id: str,
+    debug: bool,
+) -> None:
+    from .configuration import scan_config
+    from .csvdb import get_db
+
+    config = scan_config(path=config_path)
+    db = get_db(config, path)
+    logger.info("push database: %s", db.name)
+    if destination_type == "spreadsheet":
+        from .spreadsheetdb import save_db
+
+        save_db(config["spreadsheet"], db, name=name, url=url)
+    else:
+        import sys
+
+        print(
+            f"invalid destination_type {destination_type}, not implemented yet?",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def main() -> None:
     import argparse
 
@@ -116,6 +146,22 @@ def main() -> None:
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
     sparser.set_defaults(subcommand=fn)
     sparser.add_argument("-c", "--config", dest="config_path", default=None)
+    sparser.add_argument("path")
+
+    # push
+    fn = push
+    sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
+    sparser.set_defaults(subcommand=fn)
+    sparser.add_argument("-c", "--config", dest="config_path", default=None)
+    sparser.add_argument("--with-id", action="store_true")
+    sparser.add_argument(
+        "--type",
+        dest="destination_type",
+        choices=["spreadsheet"],
+        default="spreadsheet",
+    )
+    sparser.add_argument("--url")
+    sparser.add_argument("--name", required=True)
     sparser.add_argument("path")
 
     args = parser.parse_args()

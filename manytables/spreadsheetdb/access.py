@@ -33,8 +33,26 @@ def get_or_create_sheet(
 
 
 def to_cells(rows):
+    rows = _iter_rows(rows)
     cells = (
         [gspread.Cell(row=i, col=j, value=v) for j, v in enumerate(row, 1)]
         for i, row in enumerate(rows, 1)
     )
     return [cell for row in cells for cell in row]  # flatten
+
+
+def _iter_rows(rows):
+    itr = iter(rows)
+    try:
+        first_row = next(itr)
+    except StopIteration:
+        return
+
+    if hasattr(first_row, "keys"):
+        yield list(first_row.keys())
+        yield list(first_row.values())
+        for row in itr:
+            yield list(row.values())
+    else:
+        yield first_row
+        yield from itr
