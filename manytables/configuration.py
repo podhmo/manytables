@@ -3,7 +3,8 @@ import typing as t
 import typing_extensions as tx
 import logging
 import pathlib
-import qtoml
+from dictknife import loading
+
 
 logger = logging.getLogger(__name__)
 DEFAULT_CONFIG_PATH = "manytables.toml"
@@ -19,9 +20,7 @@ class Config(tx.TypedDict, total=False):
 def scan_config(*, path=None) -> Config:
     filepath = pathlib.Path(path or DEFAULT_CONFIG_PATH)
     # todo: scan
-    with open(filepath) as rf:
-        c = Config(qtoml.load(rf))
-        return c
+    return Config(loading.loadfile(str(filepath)))
 
 
 def dump_init_config(*, path=None) -> None:
@@ -37,6 +36,5 @@ def dump_init_config(*, path=None) -> None:
             }
         }
     )
-    with open(filepath, "w") as wf:
-        logger.info("create %s, as config file.", filepath)
-        qtoml.dump(config, wf)
+    logger.info("create %s, as config file.", filepath)
+    loading.dumpfile(config, str(filepath))
