@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-install_requires = ["dictknife[spreadsheet]", "gspread", "qtoml"]
+install_requires = ["oauth2client", "gspread", "qtoml", "typing_extensions"]
 dev_requires = ["black", "flake8"]
 tests_requires = []
 

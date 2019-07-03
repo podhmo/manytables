@@ -1,31 +1,32 @@
 import logging
-import pathlib
-import qtoml
 
 logger = logging.getLogger(__name__)
 
 
-def init(debug: bool) -> None:
-    filepath = pathlib.Path("manytables.toml")
-    if filepath.exists():
-        logger.info("%s is already existed", filepath)
-        return
+def init(*, debug: bool) -> None:
+    from .configuration import dump_init_config
 
-    config = {
-        "spreadsheet": {
-            "credentials": "~/.config/manytables/spreadsheet/creadentials.json"
-        }
-    }
-    with open(filepath, "w") as wf:
-        logger.info("create %s, as config file.", filepath)
-        qtoml.dump(config, wf)
+    dump_init_config()
 
 
-def clone(source_type: str, url: str, debug: bool) -> None:
+def clone(
+    *,
+    config_path: str,
+    source_type: str,
+    name: str = None,
+    url: str = None,
+    debug: bool,
+) -> None:
+    from .configuration import scan_config
+
+    config = scan_config(path=config_path)
     if source_type == "spreadsheet":
         from .spreadsheet import clone
 
-        return clone(url)
+        if name is None:
+            assert url
+            name = "<unknown>"
+        return clone(config["spreadsheet"], name=name, url=url)
     else:
         import sys
 
@@ -60,10 +61,12 @@ def main() -> None:
     fn = clone
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
     sparser.set_defaults(subcommand=fn)
+    sparser.add_argument("-c", "--config", dest="config_path", default=None)
     sparser.add_argument(
         "--type", dest="source_type", choices=["spreadsheet"], default="spreadsheet"
     )
     sparser.add_argument("--url")
+    sparser.add_argument("--name")
 
     args = parser.parse_args()
     params = vars(args).copy()
