@@ -21,12 +21,19 @@ def clone(
 
     config = scan_config(path=config_path)
     if source_type == "spreadsheet":
-        from .spreadsheet import clone
+        from .spreadsheet import get_db
 
         if name is None:
             assert url
             name = "<unknown>"
-        return clone(config["spreadsheet"], name=name, url=url)
+        db = get_db(config["spreadsheet"], name=name, url=url)
+
+        print("spreadsheet", db.name)
+        for table in db.tables:
+            print("sheet", table.name)
+            for row in table:
+                print(row)
+            print("")
     else:
         import sys
 
