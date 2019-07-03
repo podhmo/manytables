@@ -1,0 +1,18 @@
+url = 'https://docs.google.com/spreadsheets/d/18fXVSZg_z7wNsGm0SaLHHftdI7MB_r59NnAGZ-VxY-s/edit'
+
+[db]
+id = '18fXVSZg_z7wNsGm0SaLHHftdI7MB_r59NnAGZ-VxY-s'
+name = 'manytables'
+
+[[db.tables]]
+id = 0
+name = 'Group'
+
+[[db.tables]]
+id = 521453747
+name = 'Member'
+
+[[db.tables]]
+id = 1818109213
+name = 'heh'
+
