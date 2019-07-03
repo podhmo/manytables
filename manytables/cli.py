@@ -23,39 +23,17 @@ def clone(
     from .configuration import scan_config
 
     config = scan_config(path=config_path)
+
     if source_type == "spreadsheet":
         from .spreadsheetdb import get_db
+        from .csvdb import save_db
 
         if name is None:
             assert url
             name = "<unknown>"
+
         db = get_db(config["spreadsheet"], name=name, url=url)
-
-        # todo: conflict check
-        if with_id:
-            dirpath = pathlib.Path(f"{db.name}-{db.id}")
-        else:
-            dirpath = pathlib.Path(f"{db.name}")
-
-        dirpath.mkdir(exist_ok=True)
-        logger.info("database: %s", dirpath)
-
-        loading.dumpfile(db.metadata, f"{dirpath / 'metadata.toml'}")
-
-        for table in db.tables:
-            logger.info("table: %s/%s", dirpath, table.name)
-            fname = f"{dirpath / table.name}.tsv"
-
-            def gen():
-                rows = iter(table)
-                try:
-                    headers = next(rows)
-                except StopIteration:
-                    return
-
-                return (dict(zip(headers, row)) for row in rows)
-
-            loading.dumpfile(gen(), fname)  # tsv ?
+        save_db(db, with_id=with_id)
     else:
         import sys
 

@@ -1,60 +1,42 @@
-from __future__ import annotations
 import typing_extensions as tx
+import logging
 import pathlib
 from dictknife import loading
-from dictknife.langhelpers import reify
-from ..metadata import MetaData
+from .models import Database
+
+logger = logging.getLogger(__name__)
 
 
 class Config(tx.TypedDict):
     pass
 
 
-class Database:
-    def __init__(self, dirpath: pathlib.Path):
-        self.dirpath = dirpath
-
-    @property
-    def id(self):
-        return self.metadata["db"]["id"]
-
-    @property
-    def name(self):
-        return self.metadata["db"]["name"]
-
-    @reify
-    def metadata(self) -> MetaData:
-        return MetaData(loading.loadfile(str(self.dirpath / "metadata.toml")))
-
-    @reify
-    def tables(self):
-        return [Table(fmeta, database=self) for fmeta in self.metadata["db"]["tables"]]
-
-    def __iter__(self):
-        return iter(self.tables)
-
-
-class Table:
-    def __init__(self, metadata: dict, *, database: Database) -> None:
-        self.metadata = metadata
-        self.database = database
-
-    @property
-    def id(self):
-        return self.metadata["id"]
-
-    @property
-    def name(self):
-        return self.metadata["name"]
-
-    @reify
-    def rows(self):
-        fpath = str(self.database.dirpath / f"{self.name}.tsv")
-        return loading.loadfile(fpath)
-
-    def __iter__(self):
-        return iter(self.rows)
-
-
 def get_db(config: Config, dirpath: str) -> Database:
     return Database(pathlib.Path(dirpath))
+
+
+def save_db(db, *, with_id: bool = False):
+    if with_id:
+        dirpath = pathlib.Path(f"{db.name}-{db.id}")
+    else:
+        dirpath = pathlib.Path(f"{db.name}")
+
+    dirpath.mkdir(exist_ok=True)
+    logger.info("database: %s", dirpath)
+
+    loading.dumpfile(db.metadata, f"{dirpath / 'metadata.toml'}")
+
+    for table in db.tables:
+        logger.info("table: %s/%s", dirpath, table.name)
+        fname = f"{dirpath / table.name}.tsv"
+
+        def gen():
+            rows = iter(table)
+            try:
+                headers = next(rows)
+            except StopIteration:
+                return
+
+            return (dict(zip(headers, row)) for row in rows)
+
+        loading.dumpfile(gen(), fname)  # tsv ?
