@@ -69,7 +69,6 @@ def save_db(
             continue
 
         sheet = access.get_or_create_sheet(spreadsheet, table.name)
-        logger.info("select %r, in %r", sheet, spreadsheet)
         logger.info("update cells len=%d, in %r", len(cells), spreadsheet)
         sheet.update_cells(cells, value_input_option="RAW")
     return Database(spreadsheet, gclient=gclient, url=url).metadata

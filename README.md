@@ -39,9 +39,7 @@ INFO:manytables.cli:table: Member
 $ manytables push --type spreadsheet manytables
 INFO:manytables.cli:push database: manytables
 INFO:manytables.spreadsheetdb:save_db, update spreadsheet 'manytables', url=https://docs.google.com/spreadsheets/d/xxxXXXXxxxxxXxXxxXxXXXxxxXxXXxxxxXxXXXxXxXxx/edit
-INFO:manytables.spreadsheetdb:select <Worksheet 'Group' id:0>, in <Spreadsheet 'manytables' id:xxxXXXXxxxxxXxXxxXxXXXxxxXxXXxxxxXxXXXxXxXxx>
 INFO:manytables.spreadsheetdb:update cells len=10, in <Spreadsheet 'manytables' id:xxxXXXXxxxxxXxXxxXxXXXxxxXxXXxxxxXxXXXxXxXxx>
-INFO:manytables.spreadsheetdb:select <Worksheet 'Member' id:521453747>, in <Spreadsheet 'manytables' id:xxxXXXXxxxxxXxXxxXxXXXxxxXxXXxxxxXxXXXxXxXxx>
 INFO:manytables.spreadsheetdb:update cells len=21, in <Spreadsheet 'manytables' id:xxxXXXXxxxxxXxXxxXxXXXxxxXxXXxxxxXxXXXxXxXxx>
 INFO:manytables.csvdb:save metadata: 'manytables/metadata.toml'
 
