@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 
-install_requires = []
+install_requires = ["dictknife[spreadsheet]", "gspread"]
 dev_requires = ["black", "flake8"]
 tests_requires = []
 
