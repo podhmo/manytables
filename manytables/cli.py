@@ -1,4 +1,6 @@
 import logging
+import pathlib
+from dictknife import loading
 
 logger = logging.getLogger(__name__)
 
@@ -22,8 +24,6 @@ def clone(
     config = scan_config(path=config_path)
     if source_type == "spreadsheet":
         from .spreadsheet import get_db
-        import pathlib
-        from dictknife import loading
 
         if name is None:
             assert url
@@ -69,6 +69,19 @@ def clone(
         sys.exit(1)
 
 
+def show(*, config_path: str, path: str = None, debug: bool, n: int = 5) -> None:
+    from .configuration import scan_config
+    from .csvdb import get_db
+
+    config = scan_config(path=config_path)
+    db = get_db(config, path)
+    logger.info("database: %s", db.name)
+    for table in db.tables:
+        logger.info("table: %s", table.name)
+        loading.dumpfile(table.rows[:n], format="tsv")
+        print("")
+
+
 def main() -> None:
     import argparse
 
@@ -100,6 +113,13 @@ def main() -> None:
     )
     sparser.add_argument("--url")
     sparser.add_argument("--name")
+
+    # show
+    fn = show
+    sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
+    sparser.set_defaults(subcommand=fn)
+    sparser.add_argument("-c", "--config", dest="config_path", default=None)
+    sparser.add_argument("path")
 
     args = parser.parse_args()
     params = vars(args).copy()
