@@ -24,7 +24,7 @@ def clone(
 
     config = scan_config(path=config_path)
     if source_type == "spreadsheet":
-        from .spreadsheet import get_db
+        from .spreadsheetdb import get_db
 
         if name is None:
             assert url
