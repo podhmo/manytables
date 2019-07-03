@@ -35,8 +35,8 @@ def get_db(
 def save_db(
     config: Config,
     db: csvdb.Database,
-    name: str,
     *,
+    name: t.Optional[str] = None,
     url: t.Optional[str] = None,
     credentials_path: t.Optional[str] = None,
     scopes: t.List[str] = SCOPES,

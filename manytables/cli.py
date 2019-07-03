@@ -76,9 +76,6 @@ def push(
     if destination_type == "spreadsheet":
         from .spreadsheetdb import save_db
 
-        if name is None and db.metadata.get("db", {}).get("name"):
-            name = db.metadata["db"]["name"]
-
         metadata = save_db(config["spreadsheet"], db, name=name, url=url)
 
         if no_save_metadata:
