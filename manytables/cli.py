@@ -10,7 +10,7 @@ def init(*, debug: bool) -> None:
     dump_init_config()
 
 
-def clone(
+def pull(
     *,
     config_path: str,
     source_type: str,
@@ -111,8 +111,8 @@ def main() -> None:
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
     sparser.set_defaults(subcommand=fn)
 
-    # clone
-    fn = clone
+    # pull
+    fn = pull
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
     sparser.set_defaults(subcommand=fn)
     sparser.add_argument("-c", "--config", dest="config_path", default=None)
