@@ -1,6 +1,24 @@
 import logging
+import pathlib
+import qtoml
 
 logger = logging.getLogger(__name__)
+
+
+def init(debug: bool) -> None:
+    filepath = pathlib.Path("manytables.toml")
+    if filepath.exists():
+        logger.info("%s is already existed", filepath)
+        return
+
+    config = {
+        "spreadsheet": {
+            "credentials": "~/.config/manytables/spreadsheet/creadentials.json"
+        }
+    }
+    with open(filepath, "w") as wf:
+        logger.info("create %s, as config file.", filepath)
+        qtoml.dump(config, wf)
 
 
 def clone(source_type: str, url: str, debug: bool) -> None:
@@ -32,6 +50,11 @@ def main() -> None:
 
     subparsers = parser.add_subparsers(dest="subcommand")
     subparsers.required = True
+
+    # init
+    fn = init
+    sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
+    sparser.set_defaults(subcommand=fn)
 
     # clone
     fn = clone
