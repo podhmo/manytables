@@ -1,5 +1,4 @@
 import logging
-import pathlib
 from dictknife import loading
 
 logger = logging.getLogger(__name__)
@@ -63,19 +62,24 @@ def push(
     name: str = None,
     path: str,
     url: str = None,
-    with_id: str,
+    no_save_metadata: bool,
     debug: bool,
 ) -> None:
     from .configuration import scan_config
-    from .csvdb import get_db
+    from .csvdb import get_db, save_metadata
 
     config = scan_config(path=config_path)
     db = get_db(config, path)
     logger.info("push database: %s", db.name)
+
     if destination_type == "spreadsheet":
         from .spreadsheetdb import save_db
 
-        save_db(config["spreadsheet"], db, name=name, url=url)
+        metadata = save_db(config["spreadsheet"], db, name=name, url=url)
+        if no_save_metadata:
+            logger.info("no save metadata, skipped")
+        else:
+            save_metadata(metadata, path)
     else:
         import sys
 
@@ -131,7 +135,7 @@ def main() -> None:
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
     sparser.set_defaults(subcommand=fn)
     sparser.add_argument("-c", "--config", dest="config_path", default=None)
-    sparser.add_argument("--with-id", action="store_true")
+    sparser.add_argument("--no-save-metadata", action="store_true")
     sparser.add_argument(
         "--type",
         dest="destination_type",

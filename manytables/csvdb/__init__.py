@@ -2,6 +2,7 @@ import typing_extensions as tx
 import logging
 import pathlib
 from dictknife import loading
+from ..metadata import MetaData
 from .models import Database
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ def get_db(config: Config, dirpath: str) -> Database:
     return Database(pathlib.Path(dirpath))
 
 
-def save_db(db, *, with_id: bool = False):
+def save_db(db, *, with_id: bool = False) -> MetaData:
     if with_id:
         dirpath = pathlib.Path(f"{db.name}-{db.id}")
     else:
@@ -40,3 +41,9 @@ def save_db(db, *, with_id: bool = False):
             return (dict(zip(headers, row)) for row in rows)
 
         loading.dumpfile(gen(), fname)  # tsv ?
+    return db.metadata
+
+
+def save_metadata(metadata: MetaData, dirpath: str, *, with_id: bool = False):
+    dirpath = pathlib.Path(dirpath)
+    loading.dumpfile(metadata, f"{dirpath / 'metadata.toml'}")

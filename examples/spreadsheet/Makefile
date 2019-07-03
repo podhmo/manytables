@@ -7,4 +7,4 @@ URL ?= https://docs.google.com/spreadsheets/d/18fXVSZg_z7wNsGm0SaLHHftdI7MB_r59N
 	manytables show manytables
 
 02:
-	manytables push --type spreadsheet --name=manytable2 --url=https://docs.google.com/spreadsheets/d/1snkVUG7XyFtZ-CSXNoFDJuHtaTMTBgfX_BxqvqpaG0o/edit manytables
+	manytables push --no-save-metadata --type spreadsheet --name=manytable2 --url=https://docs.google.com/spreadsheets/d/1snkVUG7XyFtZ-CSXNoFDJuHtaTMTBgfX_BxqvqpaG0o/edit manytables

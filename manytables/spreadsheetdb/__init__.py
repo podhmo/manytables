@@ -39,7 +39,7 @@ def save_db(
     url: t.Optional[str] = None,
     credentials_path: t.Optional[str] = None,
     scopes: t.List[str] = SCOPES,
-) -> Database:
+) -> MetaData:
     credentials = auth.get_credentials(
         config, credentials_path=credentials_path, scopes=scopes
     )
@@ -47,6 +47,7 @@ def save_db(
     spreadsheet = access.get_or_create(gclient, name, url=url)
 
     # todo: cleanup
+    # todo: sync metadata
 
     cells = []
     for table in db.tables:
@@ -55,3 +56,4 @@ def save_db(
         cells.extend(access.to_cells(table.rows))
     logger.info("update cells len=%d, in %r", len(cells), spreadsheet)
     sheet.update_cells(cells, value_input_option="RAW")
+    return db.metadata
