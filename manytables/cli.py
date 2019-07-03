@@ -17,6 +17,7 @@ def clone(
     source_type: str,
     name: str = None,
     url: str = None,
+    with_id: str,
     debug: bool,
 ) -> None:
     from .configuration import scan_config
@@ -30,7 +31,12 @@ def clone(
             name = "<unknown>"
         db = get_db(config["spreadsheet"], name=name, url=url)
 
-        dirpath = pathlib.Path(f"{db.name}-{db.id}")
+        # todo: conflict check
+        if with_id:
+            dirpath = pathlib.Path(f"{db.name}-{db.id}")
+        else:
+            dirpath = pathlib.Path(f"{db.name}")
+
         dirpath.mkdir(exist_ok=True)
         logger.info("database: %s", dirpath)
 
@@ -108,6 +114,7 @@ def main() -> None:
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
     sparser.set_defaults(subcommand=fn)
     sparser.add_argument("-c", "--config", dest="config_path", default=None)
+    sparser.add_argument("--with-id", action="store_true")
     sparser.add_argument(
         "--type", dest="source_type", choices=["spreadsheet"], default="spreadsheet"
     )
