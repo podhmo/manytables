@@ -45,12 +45,18 @@ def save_db(
         config, credentials_path=credentials_path, scopes=scopes
     )
     gclient = access.get_client(credentials)
+
     if db.metadata.get("url"):
         if url:
             assert db.metadata["url"] == url
-        url = url or db.metadata["url"]
-        logger.info("save_db, update spreadsheet %r, url=%s", name, url)
-        spreadsheet = access.get_or_create(gclient, name, url=url)
+        if name is None:
+            url = url or db.metadata["url"]
+            logger.info("save_db, update spreadsheet %r, url=%s", name, url)
+            spreadsheet = access.get_or_create(gclient, name, url=url)
+        else:
+            assert db.metadata["db"]["name"] != name
+            logger.info("save_db, update spreadsheet %r, url=%s", name, url)
+            spreadsheet = access.get_or_create(gclient, name, url=url)
     else:
         logger.info("save_db, create spreadsheet %r", name)
         spreadsheet = gclient.create(name)

@@ -62,11 +62,12 @@ def push(
     name: str = None,
     path: str,
     url: str = None,
+    with_id: bool,
     no_save_metadata: bool,
     debug: bool,
 ) -> None:
     from .configuration import scan_config
-    from .csvdb import get_db, save_metadata
+    from .csvdb import get_db, save_metadata, get_save_dir
 
     config = scan_config(path=config_path)
     db = get_db(config, path)
@@ -75,11 +76,22 @@ def push(
     if destination_type == "spreadsheet":
         from .spreadsheetdb import save_db
 
+        if name is None and db.metadata.get("db", {}).get("name"):
+            name = db.metadata["db"]["name"]
+
         metadata = save_db(config["spreadsheet"], db, name=name, url=url)
+
         if no_save_metadata:
             logger.info("no save metadata, skipped")
-        else:
+        elif metadata["db"]["name"] == db.metadata["db"]["name"]:
             save_metadata(metadata, path)
+        else:
+            save_metadata(
+                metadata,
+                get_save_dir(
+                    metadata["db"]["name"], id=metadata["db"]["id"] if with_id else None
+                ),
+            )
     else:
         import sys
 
@@ -136,6 +148,7 @@ def main() -> None:
     sparser.set_defaults(subcommand=fn)
     sparser.add_argument("-c", "--config", dest="config_path", default=None)
     sparser.add_argument("--no-save-metadata", action="store_true")
+    sparser.add_argument("--with-id", action="store_true")
     sparser.add_argument(
         "--type",
         dest="destination_type",
@@ -143,7 +156,7 @@ def main() -> None:
         default="spreadsheet",
     )
     sparser.add_argument("--url")
-    sparser.add_argument("--name", required=True)
+    sparser.add_argument("--name")
     sparser.add_argument("path")
 
     args = parser.parse_args()

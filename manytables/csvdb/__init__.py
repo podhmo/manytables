@@ -1,3 +1,4 @@
+import typing as t
 import typing_extensions as tx
 import logging
 import pathlib
@@ -16,13 +17,17 @@ def get_db(config: Config, dirpath: str) -> Database:
     return Database(pathlib.Path(dirpath))
 
 
-def save_db(db, *, with_id: bool = False) -> MetaData:
-    if with_id:
-        dirpath = pathlib.Path(f"{db.name}-{db.id}")
+def get_save_dir(name: str, *, id: t.Optional[str] = None) -> pathlib.Path:
+    if id:
+        return pathlib.Path(f"{name}-{id}")
     else:
-        dirpath = pathlib.Path(f"{db.name}")
+        return pathlib.Path(f"{name}")
 
+
+def save_db(db, *, with_id: bool = False) -> MetaData:
+    dirpath = get_save_dir(db.name, id=db.id if with_id else None)
     dirpath.mkdir(exist_ok=True)
+
     logger.info("database: %s", dirpath)
 
     loading.dumpfile(db.metadata, f"{dirpath / 'metadata.toml'}")
@@ -44,8 +49,9 @@ def save_db(db, *, with_id: bool = False) -> MetaData:
     return db.metadata
 
 
-def save_metadata(metadata: MetaData, dirpath: str, *, with_id: bool = False):
+def save_metadata(metadata: MetaData, dirpath: str):
     dirpath = pathlib.Path(dirpath)
+    dirpath.mkdir(exist_ok=True)
     filepath = f"{dirpath / 'metadata.toml'}"
     loading.dumpfile(metadata, filepath)
     logger.info("save metadata: %r", filepath)
