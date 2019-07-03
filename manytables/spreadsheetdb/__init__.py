@@ -1,6 +1,7 @@
 from __future__ import annotations
 import typing as t
 import logging
+from ..metadata import MetaData
 from .. import csvdb  # xxx
 from . import auth
 from . import access
@@ -44,16 +45,25 @@ def save_db(
         config, credentials_path=credentials_path, scopes=scopes
     )
     gclient = access.get_client(credentials)
-    spreadsheet = access.get_or_create(gclient, name, url=url)
+    if db.metadata.get("url"):
+        if url:
+            assert db.metadata["url"] == url
+        url = url or db.metadata["url"]
+        logger.info("save_db, update spreadsheet %r, url=%s", name, url)
+        spreadsheet = access.get_or_create(gclient, name, url=url)
+    else:
+        logger.info("save_db, create spreadsheet %r", name)
+        spreadsheet = gclient.create(name)
 
     # todo: cleanup
-    # todo: sync metadata
 
-    cells = []
     for table in db.tables:
+        cells = access.to_cells(table.rows)
+        if not cells:
+            continue
+
         sheet = access.get_or_create_sheet(spreadsheet, table.name)
-        logger.info("create for %r, in %r", sheet, spreadsheet)
-        cells.extend(access.to_cells(table.rows))
-    logger.info("update cells len=%d, in %r", len(cells), spreadsheet)
-    sheet.update_cells(cells, value_input_option="RAW")
-    return db.metadata
+        logger.info("select %r, in %r", sheet, spreadsheet)
+        logger.info("update cells len=%d, in %r", len(cells), spreadsheet)
+        sheet.update_cells(cells, value_input_option="RAW")
+    return Database(spreadsheet, gclient=gclient, url=url).metadata

@@ -1,8 +1,11 @@
 from __future__ import annotations
+import logging
 import pathlib
 from dictknife import loading
 from dictknife.langhelpers import reify
 from ..metadata import MetaData
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -23,7 +26,19 @@ class Database:
 
     @reify
     def tables(self):
-        return [Table(fmeta, database=self) for fmeta in self.metadata["db"]["tables"]]
+        seen = set()
+        tables = []
+        for fmeta in self.metadata["db"]["tables"]:
+            table = Table(fmeta, database=self)
+            seen.add(table.name)
+            tables.append(table)
+        for fpath in self.dirpath.glob("*.tsv"):
+            name = fpath.name[: -len(fpath.suffix)]
+            if name in seen:
+                continue
+            fmeta = {"id": "", "name": name}
+            tables.append(Table(fmeta, database=self))
+        return tables
 
     def __iter__(self):
         return iter(self.tables)
@@ -45,7 +60,11 @@ class Table:
     @reify
     def rows(self):
         fpath = str(self.database.dirpath / f"{self.name}.tsv")
-        return loading.loadfile(fpath)
+        try:
+            return loading.loadfile(fpath)
+        except FileNotFoundError as e:
+            logger.info("%s, %r", fpath, e)
+            return []
 
     def __iter__(self):
         return iter(self.rows)

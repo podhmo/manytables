@@ -46,4 +46,6 @@ def save_db(db, *, with_id: bool = False) -> MetaData:
 
 def save_metadata(metadata: MetaData, dirpath: str, *, with_id: bool = False):
     dirpath = pathlib.Path(dirpath)
-    loading.dumpfile(metadata, f"{dirpath / 'metadata.toml'}")
+    filepath = f"{dirpath / 'metadata.toml'}"
+    loading.dumpfile(metadata, filepath)
+    logger.info("save metadata: %r", filepath)
