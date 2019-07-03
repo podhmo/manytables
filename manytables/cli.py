@@ -22,18 +22,44 @@ def clone(
     config = scan_config(path=config_path)
     if source_type == "spreadsheet":
         from .spreadsheet import get_db
+        import pathlib
+        from dictknife import loading
 
         if name is None:
             assert url
             name = "<unknown>"
         db = get_db(config["spreadsheet"], name=name, url=url)
 
-        print("spreadsheet", db.name)
-        for table in db.tables:
-            print("sheet", table.name)
-            for row in table:
-                print(row)
-            print("")
+        dirpath = pathlib.Path(f"{db.name}-{db.id}")
+        dirpath.mkdir(exist_ok=True)
+        logger.info("database: %s", dirpath)
+
+        tables = list(db.tables)
+        # todo: revision
+        metadata = {
+            "url": url,
+            "db": {
+                "id": db.id,
+                "name": db.name,
+                "tables": [{"id": table.id, "name": table.name} for table in tables],
+            },
+        }
+        loading.dumpfile(metadata, f"{dirpath / 'metadata.toml'}")
+
+        for table in tables:
+            logger.info("table: %s/%s", dirpath, table.name)
+            fname = f"{dirpath / table.name}.tsv"
+
+            def gen():
+                rows = iter(table)
+                try:
+                    headers = next(rows)
+                except StopIteration:
+                    return
+
+                return (dict(zip(headers, row)) for row in rows)
+
+            loading.dumpfile(gen(), fname)  # tsv ?
     else:
         import sys
 
