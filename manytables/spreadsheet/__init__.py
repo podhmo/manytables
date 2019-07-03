@@ -4,6 +4,8 @@ import typing_extensions as tx
 import logging
 import pathlib
 import gspread
+from dictknife.langhelpers import reify
+from ..metadata import MetaData
 from . import auth
 from . import access
 
@@ -23,10 +25,26 @@ class Database:
     _internal: gspread.Spreadsheet
 
     def __init__(
-        self, spreadsheet: gspread.Spreadsheet, *, gclient=gspread.Client
+        self, spreadsheet: gspread.Spreadsheet, *, gclient=gspread.Client, url=None
     ) -> None:
+        self._url = url
         self._gclient = gclient
         self._internal = spreadsheet
+
+    @reify
+    def metadata(self) -> MetaData:
+        url = self._url or f"https://docs.google.com/spreadsheets/d/{self.id}/edit"
+        metadata = {
+            "url": url,
+            "db": {
+                "id": self.id,
+                "name": self.name,
+                "tables": [
+                    {"id": table.id, "name": table.name} for table in self.tables
+                ],
+            },
+        }
+        return MetaData(metadata)
 
     @property
     def id(self) -> str:
@@ -36,7 +54,7 @@ class Database:
     def name(self) -> str:
         return self._internal.title
 
-    @property
+    @reify
     def tables(self):
         return [Table(ws, database=self) for ws in self._internal.worksheets()]
 
@@ -87,4 +105,4 @@ def get_db(
     gclient = access.get_client(credentials)
 
     spreadsheet = access.get_or_create(gclient, name, url=url)
-    return Database(spreadsheet, gclient=gclient)
+    return Database(spreadsheet, gclient=gclient, url=url)

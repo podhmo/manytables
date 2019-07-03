@@ -1,29 +1,13 @@
 from __future__ import annotations
-import typing as t
 import typing_extensions as tx
 import pathlib
 from dictknife import loading
 from dictknife.langhelpers import reify
+from ..metadata import MetaData
 
 
 class Config(tx.TypedDict):
     pass
-
-
-class MetaData(tx.TypedDict):
-    url: str
-    db: DBMetadata
-
-
-class DBMetadata(tx.TypedDict):
-    id: str
-    name: str
-    tables: t.List[TableMetadata]
-
-
-class TableMetadata(tx.TypedDict):
-    id: str
-    name: str
 
 
 class Database:
@@ -32,19 +16,19 @@ class Database:
 
     @property
     def id(self):
-        return self._metadata["db"]["id"]
+        return self.metadata["db"]["id"]
 
     @property
     def name(self):
-        return self._metadata["db"]["name"]
+        return self.metadata["db"]["name"]
 
     @reify
-    def _metadata(self) -> MetaData:
+    def metadata(self) -> MetaData:
         return MetaData(loading.loadfile(str(self.dirpath / "metadata.toml")))
 
     @reify
     def tables(self):
-        return [Table(fmeta, database=self) for fmeta in self._metadata["db"]["tables"]]
+        return [Table(fmeta, database=self) for fmeta in self.metadata["db"]["tables"]]
 
     def __iter__(self):
         return iter(self.tables)
@@ -52,16 +36,16 @@ class Database:
 
 class Table:
     def __init__(self, metadata: dict, *, database: Database) -> None:
-        self._metadata = metadata
+        self.metadata = metadata
         self.database = database
 
     @property
     def id(self):
-        return self._metadata["id"]
+        return self.metadata["id"]
 
     @property
     def name(self):
-        return self._metadata["name"]
+        return self.metadata["name"]
 
     @reify
     def rows(self):

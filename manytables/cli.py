@@ -40,19 +40,9 @@ def clone(
         dirpath.mkdir(exist_ok=True)
         logger.info("database: %s", dirpath)
 
-        tables = list(db.tables)
-        # todo: revision
-        metadata = {
-            "url": url,
-            "db": {
-                "id": db.id,
-                "name": db.name,
-                "tables": [{"id": table.id, "name": table.name} for table in tables],
-            },
-        }
-        loading.dumpfile(metadata, f"{dirpath / 'metadata.toml'}")
+        loading.dumpfile(db.metadata, f"{dirpath / 'metadata.toml'}")
 
-        for table in tables:
+        for table in db.tables:
             logger.info("table: %s/%s", dirpath, table.name)
             fname = f"{dirpath / table.name}.tsv"
 
