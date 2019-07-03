@@ -10,7 +10,7 @@ def init(*, debug: bool) -> None:
     dump_init_config()
 
 
-def pull(
+def clone(
     *,
     config_path: str,
     source_type: str,
@@ -27,11 +27,38 @@ def pull(
         from .spreadsheetdb import get_db
         from .csvdb import save_db
 
-        if name is None:
-            assert url
-            name = "<unknown>"
+        db = get_db(config["spreadsheet"], url=url, name=name)
+        save_db(db, name=name, with_id=with_id)
+    else:
+        import sys
 
-        db = get_db(config["spreadsheet"], name=name, url=url)
+        print(
+            f"invalid source_type {source_type}, not implemented yet?", file=sys.stderr
+        )
+        sys.exit(1)
+
+
+def pull(
+    *,
+    config_path: str,
+    source_type: str,
+    name: str = None,
+    path: str,
+    with_id: str,
+    debug: bool,
+) -> None:
+    from .configuration import scan_config
+    from .csvdb import get_db as get_db_local
+
+    config = scan_config(path=config_path)
+    local_db = get_db_local(config, path)
+    url = local_db.metadata["url"]
+
+    if source_type == "spreadsheet":
+        from .spreadsheetdb import get_db
+        from .csvdb import save_db
+
+        db = get_db(config["spreadsheet"], url=url)
         save_db(db, with_id=with_id)
     else:
         import sys
@@ -120,6 +147,18 @@ def main() -> None:
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
     sparser.set_defaults(subcommand=fn)
 
+    # clone
+    fn = clone
+    sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
+    sparser.set_defaults(subcommand=fn)
+    sparser.add_argument("-c", "--config", dest="config_path", default=None)
+    sparser.add_argument("--with-id", action="store_true")
+    sparser.add_argument(
+        "--type", dest="source_type", choices=["spreadsheet"], default="spreadsheet"
+    )
+    sparser.add_argument("--name")
+    sparser.add_argument("url")
+
     # pull
     fn = pull
     sparser = subparsers.add_parser(fn.__name__, description=fn.__doc__)
@@ -129,8 +168,7 @@ def main() -> None:
     sparser.add_argument(
         "--type", dest="source_type", choices=["spreadsheet"], default="spreadsheet"
     )
-    sparser.add_argument("--url")
-    sparser.add_argument("--name")
+    sparser.add_argument("path")
 
     # show
     fn = show

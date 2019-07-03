@@ -24,7 +24,8 @@ def get_save_dir(name: str, *, id: t.Optional[str] = None) -> pathlib.Path:
         return pathlib.Path(f"{name}")
 
 
-def save_db(db, *, with_id: bool = False) -> MetaData:
+def save_db(db, *, name: str = None, with_id: bool = False) -> MetaData:
+    name = name or db.name
     dirpath = get_save_dir(db.name, id=db.id if with_id else None)
     dirpath.mkdir(exist_ok=True)
 

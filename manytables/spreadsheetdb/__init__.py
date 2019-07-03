@@ -18,12 +18,14 @@ SCOPES = [
 
 def get_db(
     config: Config,
-    name: str,
     *,
+    name: t.Optional[str] = None,
     url: t.Optional[str] = None,
     credentials_path: t.Optional[str] = None,
     scopes: t.List[str] = SCOPES,
 ) -> Database:
+    assert not (name is None and url is None)
+
     credentials = auth.get_credentials(
         config, credentials_path=credentials_path, scopes=scopes
     )

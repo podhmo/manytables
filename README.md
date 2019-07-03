@@ -14,7 +14,7 @@ $ pip install manytables
 $ manytables init
 INFO:manytables.configuration:create manytables.toml, as config file.
 
-$ manytables pull --type spreadsheet --url=https://docs.google.com/spreadsheets/d/xxxXXXXxxxxxXxXxxXxXXXxxxXxXXxxxxXxXXXxXxXxx/edit
+$ manytables clone --type spreadsheet https://docs.google.com/spreadsheets/d/xxxXXXXxxxxxXxXxxXxXXXxxxXxXXxxxxXxXXXxXxXxx/edit
 INFO:manytables.csvdb:database: manytables
 INFO:manytables.csvdb:table: manytables/Group
 INFO:manytables.csvdb:table: manytables/Member
@@ -35,6 +35,11 @@ INFO:manytables.cli:table: Member
 "3"	"z"	"1"
 "4"	"i"	"1"
 "5"	"j"	"2"
+
+$ manytables pull manytables
+INFO:manytables.csvdb:database: manytables
+INFO:manytables.csvdb:table: manytables/Group
+INFO:manytables.csvdb:table: manytables/Member
 
 $ manytables push --type spreadsheet manytables
 INFO:manytables.cli:push database: manytables
