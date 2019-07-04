@@ -1,4 +1,5 @@
 import logging
+import sys
 from dictknife import loading
 
 logger = logging.getLogger(__name__)
@@ -30,8 +31,6 @@ def clone(
         db = load_db(config["spreadsheet"], url=url, name=name)
         save_db(db, name=name, with_id=with_id)
     else:
-        import sys
-
         print(
             f"invalid source_type {source_type}, not implemented yet?", file=sys.stderr
         )
@@ -61,8 +60,6 @@ def pull(
         db = load_db(config["spreadsheet"], url=url)
         save_db(db, with_id=with_id)
     else:
-        import sys
-
         print(
             f"invalid source_type {source_type}, not implemented yet?", file=sys.stderr
         )
@@ -91,13 +88,31 @@ def push(
     url: str = None,
     with_id: bool,
     no_save_metadata: bool,
+    allow_empty: str,
     debug: bool,
 ) -> None:
     from .configuration import scan_config
     from .csvdb import load_db, save_metadata, get_save_dir
 
+    def _get_db():
+        db = load_db(config, path)
+        try:
+            db.name
+        except FileNotFoundError:
+            if not allow_empty:
+                print(
+                    "metadata.toml is not found, if firsttime, please call it with --allow-empty and --name <name>",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            if name is None:
+                print("--name is required, with --allow-empty", file=sys.stderr)
+                sys.exit(1)
+            db.metadata = {"db": {"name": name, "tables": []}}
+        return db
+
     config = scan_config(path=config_path)
-    db = load_db(config, path)
+    db = _get_db()
     logger.info("push database: %s", db.name)
 
     if destination_type == "spreadsheet":
@@ -117,8 +132,6 @@ def push(
                 ),
             )
     else:
-        import sys
-
         print(
             f"invalid destination_type {destination_type}, not implemented yet?",
             file=sys.stderr,
@@ -192,6 +205,7 @@ def main() -> None:
     )
     sparser.add_argument("--url")
     sparser.add_argument("--name")
+    sparser.add_argument("--allow-empty", action="store_true")
     sparser.add_argument("path")
 
     args = parser.parse_args()

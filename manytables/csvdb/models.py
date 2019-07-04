@@ -16,7 +16,7 @@ class Database:
     def id(self):
         return self.metadata["db"]["id"]
 
-    @property
+    @reify
     def name(self):
         return self.metadata["db"]["name"]
 
