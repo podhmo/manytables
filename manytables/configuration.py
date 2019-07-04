@@ -32,7 +32,7 @@ def dump_init_config(*, path=None) -> None:
     config = Config(
         {
             "spreadsheet": {
-                "credentials": "~/.config/manytables/spreadsheet/creadentials.json"
+                "credentials": "~/.config/manytables/spreadsheet/credentials.json"
             }
         }
     )
