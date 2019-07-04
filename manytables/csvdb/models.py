@@ -1,4 +1,5 @@
 from __future__ import annotations
+import itertools
 import logging
 import pathlib
 from dictknife import loading
@@ -32,11 +33,13 @@ class Database:
             table = Table(fmeta, database=self)
             seen.add(table.name)
             tables.append(table)
-        for fpath in self.dirpath.glob("*.tsv"):
+        for fpath in itertools.chain(
+            self.dirpath.glob("*.tsv"), self.dirpath.glob("*.csv")
+        ):
             name = fpath.name[: -len(fpath.suffix)]
             if name in seen:
                 continue
-            fmeta = {"id": "", "name": name}
+            fmeta = {"id": "", "name": name, "file": fpath}
             tables.append(Table(fmeta, database=self))
         return tables
 
@@ -59,7 +62,7 @@ class Table:
 
     @reify
     def rows(self):
-        fpath = str(self.database.dirpath / f"{self.name}.tsv")
+        fpath = self.metadata["file"] or str(self.database.dirpath / f"{self.name}.tsv")
         try:
             return loading.loadfile(fpath)
         except FileNotFoundError as e:

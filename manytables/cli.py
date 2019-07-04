@@ -91,8 +91,12 @@ def push(
     allow_empty: str,
     debug: bool,
 ) -> None:
+    import pathlib
     from .configuration import scan_config
     from .csvdb import load_db, save_metadata, get_save_dir
+
+    config = scan_config(path=config_path)
+    name = name or pathlib.Path(path).name
 
     def _get_db():
         db = load_db(config, path)
@@ -101,17 +105,13 @@ def push(
         except FileNotFoundError:
             if not allow_empty:
                 print(
-                    "metadata.toml is not found, if firsttime, please call it with --allow-empty and --name <name>",
+                    "metadata.toml is not found, if firsttime, please call it with --allow-empty",
                     file=sys.stderr,
                 )
-                sys.exit(1)
-            if name is None:
-                print("--name is required, with --allow-empty", file=sys.stderr)
                 sys.exit(1)
             db.metadata = {"db": {"name": name, "tables": []}}
         return db
 
-    config = scan_config(path=config_path)
     db = _get_db()
     logger.info("push database: %s", db.name)
 
