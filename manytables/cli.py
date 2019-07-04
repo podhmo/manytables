@@ -24,10 +24,10 @@ def clone(
     config = scan_config(path=config_path)
 
     if source_type == "spreadsheet":
-        from .spreadsheetdb import get_db
+        from .spreadsheetdb import load_db
         from .csvdb import save_db
 
-        db = get_db(config["spreadsheet"], url=url, name=name)
+        db = load_db(config["spreadsheet"], url=url, name=name)
         save_db(db, name=name, with_id=with_id)
     else:
         import sys
@@ -48,17 +48,17 @@ def pull(
     debug: bool,
 ) -> None:
     from .configuration import scan_config
-    from .csvdb import get_db as get_db_local
+    from .csvdb import load_db as load_db_local
 
     config = scan_config(path=config_path)
-    local_db = get_db_local(config, path)
+    local_db = load_db_local(config, path)
     url = local_db.metadata["url"]
 
     if source_type == "spreadsheet":
-        from .spreadsheetdb import get_db
+        from .spreadsheetdb import load_db
         from .csvdb import save_db
 
-        db = get_db(config["spreadsheet"], url=url)
+        db = load_db(config["spreadsheet"], url=url)
         save_db(db, with_id=with_id)
     else:
         import sys
@@ -71,10 +71,10 @@ def pull(
 
 def show(*, config_path: str, path: str = None, debug: bool, n: int = 5) -> None:
     from .configuration import scan_config
-    from .csvdb import get_db
+    from .csvdb import load_db
 
     config = scan_config(path=config_path)
-    db = get_db(config, path)
+    db = load_db(config, path)
     logger.info("database: %s", db.name)
     for table in db.tables:
         logger.info("table: %s", table.name)
@@ -94,10 +94,10 @@ def push(
     debug: bool,
 ) -> None:
     from .configuration import scan_config
-    from .csvdb import get_db, save_metadata, get_save_dir
+    from .csvdb import load_db, save_metadata, get_save_dir
 
     config = scan_config(path=config_path)
-    db = get_db(config, path)
+    db = load_db(config, path)
     logger.info("push database: %s", db.name)
 
     if destination_type == "spreadsheet":

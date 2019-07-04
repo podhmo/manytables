@@ -13,7 +13,7 @@ class Config(tx.TypedDict):
     pass
 
 
-def get_db(config: Config, dirpath: str) -> Database:
+def load_db(config: Config, dirpath: str) -> Database:
     return Database(pathlib.Path(dirpath))
 
 

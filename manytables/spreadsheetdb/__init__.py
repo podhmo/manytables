@@ -16,7 +16,7 @@ SCOPES = [
 ]
 
 
-def get_db(
+def load_db(
     config: Config,
     *,
     name: t.Optional[str] = None,
