@@ -18,7 +18,7 @@ class Database:
 
     @reify
     def metadata(self) -> MetaData:
-        url = self._url or f"https://docs.google.com/spreadsheets/d/{self.id}/edit"
+        url = self._url or f"https://docs.google.com/spreadsheets/d/{self.id}/edit#gid=0"
         metadata = {
             "resource_type": "spreadsheet",
             "url": url,
