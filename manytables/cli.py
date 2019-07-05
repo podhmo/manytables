@@ -48,6 +48,7 @@ def pull(
 ) -> None:
     from .configuration import scan_config
     from .csvdb import load_db as load_db_local
+    from .metadata import bind_metadata
 
     config = scan_config(path=config_path)
     local_db = load_db_local(config, path)
@@ -58,6 +59,7 @@ def pull(
         from .csvdb import save_db
 
         db = load_db(config["spreadsheet"], url=url)
+        db.metadata = bind_metadata(db.metadata, local_db.metadata)
         save_db(db, with_id=with_id)
     else:
         print(
@@ -94,6 +96,7 @@ def push(
     import pathlib
     from .configuration import scan_config
     from .csvdb import load_db, save_metadata, get_save_dir
+    from .metadata import bind_metadata
 
     config = scan_config(path=config_path)
     name = name or pathlib.Path(path).name
@@ -110,6 +113,7 @@ def push(
                 )
                 sys.exit(1)
             db.metadata = {"db": {"name": name, "tables": []}}
+            db.metadata["db"]["tables"] = [t.metadata for t in db.tables]
         return db
 
     db = _get_db()
@@ -119,6 +123,7 @@ def push(
         from .spreadsheetdb import save_db
 
         metadata = save_db(config["spreadsheet"], db, name=name, url=url)
+        metadata = bind_metadata(metadata, db.metadata)
 
         if no_save_metadata:
             logger.info("no save metadata, skipped")

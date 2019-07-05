@@ -30,12 +30,12 @@ def save_db(db, *, name: str = None, with_id: bool = False) -> MetaData:
     dirpath.mkdir(exist_ok=True)
 
     logger.info("database: %s", dirpath)
-
     loading.dumpfile(db.metadata, f"{dirpath / 'metadata.toml'}")
 
+    fname_map = {m["name"]: m.get("file") for m in db.metadata["db"]["tables"]}
     for table in db.tables:
         logger.info("table: %s/%s", dirpath, table.name)
-        fname = f"{dirpath / table.name}.tsv"
+        fname = fname_map.get(table.name) or f"{dirpath / table.name}.tsv"
 
         def gen():
             rows = iter(table)

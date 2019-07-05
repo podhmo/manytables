@@ -56,7 +56,6 @@ def save_db(
             logger.info("save_db, update spreadsheet %r, url=%s", name, url)
             spreadsheet = access.get_or_create(gclient, name, url=url)
         else:
-            assert db.metadata["db"]["name"] != name
             logger.info("save_db, update spreadsheet %r, url=%s", name, url)
             spreadsheet = access.get_or_create(gclient, name, url=url)
     else:

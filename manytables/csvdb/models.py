@@ -39,7 +39,7 @@ class Database:
             name = fpath.name[: -len(fpath.suffix)]
             if name in seen:
                 continue
-            fmeta = {"id": "", "name": name, "file": fpath}
+            fmeta = {"name": name, "file": str(fpath.relative_to(self.dirpath))}
             tables.append(Table(fmeta, database=self))
         return tables
 
@@ -62,7 +62,9 @@ class Table:
 
     @reify
     def rows(self):
-        fpath = self.metadata["file"] or str(self.database.dirpath / f"{self.name}.tsv")
+        fpath = self.database.dirpath / (
+            self.metadata.get("file") or f"{self.name}.tsv"
+        )
         try:
             return loading.loadfile(fpath)
         except FileNotFoundError as e:
